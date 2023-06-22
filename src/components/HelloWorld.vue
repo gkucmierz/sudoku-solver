@@ -1,11 +1,62 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch, reactive } from 'vue'
 
-const cells = new Array(9*9).fill(0).map((_, i) => {
+const KEY_DELETE = 'Delete';
+const KEY_BACKSPACE = 'Backspace';
+const allowedChars = new Set([...'0123456789 ']);
+const ARROW_UP = 'ArrowUp';
+const ARROW_RIGTH = 'ArrowRight';
+const ARROW_DOWN = 'ArrowDown';
+const ARROW_LEFT = 'ArrowLeft';
+const MAX = 9 * 9;
+
+const cells = reactive(new Array(MAX).fill(0).map((_, i) => {
   return {
-    val: i
+    val: ''
   };
-});
+}));
+
+const cellsRefs = ref([]);
+
+// watch(() => cells.value, 
+//   curr => {
+//     console.log(curr);
+//   },
+//   { deep: true }
+// );
+
+const idx2Coords = idx => [idx / 9 | 0, idx % 9];
+const coords2idx = (row, col) => row * 9 + col;
+
+const setFocus = ci => {
+  cellsRefs._value[ci].focus();
+};
+
+const keyDown = (event, i) => {
+  const isArrow = [ARROW_UP, ARROW_RIGTH, ARROW_DOWN, ARROW_LEFT].includes(event.key);
+  if (isArrow) {
+    const [row, col] = idx2Coords(i);
+    const ni = coords2idx(
+      (row + (event.key === ARROW_UP ? -1 : 0) + (event.key === ARROW_DOWN ? 1 : 0) + 9) % 9,
+      (col + (event.key === ARROW_LEFT ? -1 : 0) + (event.key === ARROW_RIGTH ? 1 : 0) + 9) % 9,
+    );
+    setFocus(ni);
+    event.preventDefault();
+  }
+};
+
+// const keyPress = (event, i) => {
+//   const isEmpty = cells[i].val === '';
+//   const isAllowed = allowedChars.has(event.code);
+//   const isArrow = [ARROW_UP, ARROW_RIGTH, ARROW_DOWN, ARROW_LEFT].includes(event.key);
+//   if (isArrow) {
+//     const [row, col] = idx2Coords(i);
+//     // setFocus(coords2idx(
+//     //   (row + (event.key === ARROW_LEFT ? -1 : 0) + (event.key === ARROW_RIGTH ? 1 : 0) + 9) % 9,
+//     //   (col + (event.key === ARROW_UP ? -1 : 0) + (event.key === ARROW_DOWN ? 1 : 0) + 9) % 9,
+//     // ));
+//   }
+// };
 
 </script>
 
@@ -14,11 +65,18 @@ const cells = new Array(9*9).fill(0).map((_, i) => {
 
   <div id="container">
     <div id="board">
-      <div class="cell" v-for="cell in cells">
-        <input type="number" />
+      <div class="cell" v-for="(cell, i) in cells">
+        <input
+          type="number"
+          ref="cellsRefs"
+          v-model="cell.val"
+          @keydown="keyDown($event, i)"
+          />
       </div>
     </div>
   </div>
+
+  {{ cells }}
 
 </template>
 
