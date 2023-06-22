@@ -34,6 +34,9 @@ const setFocus = ci => {
 
 const keyDown = (event, i) => {
   const isArrow = [ARROW_UP, ARROW_RIGTH, ARROW_DOWN, ARROW_LEFT].includes(event.key);
+  // const isEmpty = cells[i].val === '';
+  const isAllowed = allowedChars.has(event.key);
+  const isRemoving = [KEY_BACKSPACE, KEY_DELETE].includes(event.key);
   if (isArrow) {
     const [row, col] = idx2Coords(i);
     const ni = coords2idx(
@@ -41,22 +44,18 @@ const keyDown = (event, i) => {
       (col + (event.key === ARROW_LEFT ? -1 : 0) + (event.key === ARROW_RIGTH ? 1 : 0) + 9) % 9,
     );
     setFocus(ni);
-    event.preventDefault();
+  } else if (isAllowed) {
+    cells[i].val = [' ', '0'].includes(event.key) ? '' : event.key
+    setFocus((i + 1 + MAX) % MAX);
+  } else if (isRemoving) {
+    cells[i].val = '';
+    // if (event.key === KEY_BACKSPACE && isEmpty) {
+    if (event.key === KEY_BACKSPACE) {
+      setFocus((i - 1 + MAX) % MAX);
+    }
   }
+  event.preventDefault();
 };
-
-// const keyPress = (event, i) => {
-//   const isEmpty = cells[i].val === '';
-//   const isAllowed = allowedChars.has(event.code);
-//   const isArrow = [ARROW_UP, ARROW_RIGTH, ARROW_DOWN, ARROW_LEFT].includes(event.key);
-//   if (isArrow) {
-//     const [row, col] = idx2Coords(i);
-//     // setFocus(coords2idx(
-//     //   (row + (event.key === ARROW_LEFT ? -1 : 0) + (event.key === ARROW_RIGTH ? 1 : 0) + 9) % 9,
-//     //   (col + (event.key === ARROW_UP ? -1 : 0) + (event.key === ARROW_DOWN ? 1 : 0) + 9) % 9,
-//     // ));
-//   }
-// };
 
 </script>
 
@@ -75,8 +74,6 @@ const keyDown = (event, i) => {
       </div>
     </div>
   </div>
-
-  {{ cells }}
 
 </template>
 
