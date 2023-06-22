@@ -1,5 +1,6 @@
 <script setup>
-import { ref, watch, reactive } from 'vue'
+import { ref, watch, reactive } from 'vue';
+import { solve } from '../utils/sudoku.js';
 
 const KEY_DELETE = 'Delete';
 const KEY_BACKSPACE = 'Backspace';
@@ -57,10 +58,17 @@ const keyDown = (event, i) => {
   event.preventDefault();
 };
 
+const solveBtn = () => {
+  console.log('solve', cells.map(cell => +cell.val));
+  const solutions = solve(cells.map(cell => +cell.val));
+  if (solutions.length <= 0) return alert('no solutions');
+  cells.map((cell, i) => cell.val = solutions[0][i]);
+};
+
 </script>
 
 <template>
-  <h1>Sudoku Solver</h1>
+  <!-- <h1>Sudoku Solver</h1> -->
 
   <div id="container">
     <div id="board">
@@ -74,6 +82,8 @@ const keyDown = (event, i) => {
       </div>
     </div>
   </div>
+
+  <input type="button" value="Solve" @click="solveBtn" />
 
 </template>
 
